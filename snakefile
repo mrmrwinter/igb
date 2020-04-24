@@ -12,7 +12,7 @@ rule all:
         expand("data/outputs/{sample}_secondHits", sample=SAMPLE),
         expand("data/outputs/{sample}_percentIdents", sample=SAMPLE),
         expand("data/outputs/{sample}_percentIdents", sample=SAMPLE),
-        #expand("data/outputs/{sample}_plot.png", sample=SAMPLE)
+        expand("data/outputs/{sample}.pdf", sample=SAMPLE)
 
 # make database of cds fasta
 rule make_blast_database:
@@ -83,11 +83,10 @@ rule take_percent_ident:
 
 
 # #plot
-# rule plot:
-#     input:
-#         "outputs/percent_idents"
-#     output:
-#         "outputs/plots/{sample}.png"
-#     shell:
-#         "Rscript plot"
-# # this will plot the percent identities as a histogram
+rule plot:
+    input:
+        "data/outputs/{sample}_percentIdents"
+    output:
+        "data/outputs/{sample}.pdf"
+    script:
+        "scripts/pdplot.py"
