@@ -13,11 +13,11 @@ SAMPLE, = glob_wildcards("data/input/{sample}.cds_nt.fa")
 rule all:
     input:
         expand("data/database/{sample}_cds.nhr", sample=SAMPLE),
-        expand("data/outputs/{sample}_blastResults", sample=SAMPLE),
-        expand("data/outputs/{sample}_secondHits", sample=SAMPLE),
-        expand("data/outputs/{sample}_percentIdents", sample=SAMPLE),
-        expand("data/outputs/{sample}_percentIdents", sample=SAMPLE),
-        expand("data/outputs/{sample}.pdf", sample=SAMPLE)
+        expand("outputs/{sample}_blastResults", sample=SAMPLE),
+        expand("outputs/{sample}_secondHits", sample=SAMPLE),
+        expand("outputs/{sample}_percentIdents", sample=SAMPLE),
+        expand("outputs/{sample}_percentIdents", sample=SAMPLE),
+        expand("outputs/{sample}.pdf", sample=SAMPLE)
 
 # make database of cds fasta
 rule make_blast_database:
@@ -42,7 +42,7 @@ rule blastn:
         db = "data/database/{sample}_cds.nhr",
         query = "data/input/{sample}.cds_nt.fa"
     output:
-        "data/outputs/{sample}_blastResults"
+        "outputs/{sample}_blastResults"
     params:
         "data/database/{sample}_cds"
     threads:
@@ -69,9 +69,9 @@ rule blastn:
 rule take_second_hit:
 # needs to parse blast output and take the second top hit row and write it to a table
     input:
-        "data/outputs/{sample}_blastResults"
+        "outputs/{sample}_blastResults"
     output:
-        "data/outputs/{sample}_secondHits"
+        "outputs/{sample}_secondHits"
     shell:
       "awk 'NR % 2 == 0' {input} > {output}"
 #
@@ -80,9 +80,9 @@ rule take_second_hit:
 rule take_percent_ident:
 # this will take the column with all of the percent identities and either add them to a df or a table
     input:
-        "data/outputs/{sample}_secondHits"
+        "outputs/{sample}_secondHits"
     output:
-        "data/outputs/{sample}_percentIdents"
+        "outputs/{sample}_percentIdents"
     shell:
         "awk '{{print $3}}' {input} | grep -v '100.000' > {output}"
 
@@ -90,8 +90,8 @@ rule take_percent_ident:
 # #plot
 rule plot:
     input:
-        "data/outputs/{sample}_percentIdents"
+        "outputs/{sample}_percentIdents"
     output:
-        "data/outputs/{sample}.pdf"
+        "outputs/{sample}.pdf"
     script:
         "scripts/pdplot.py"
