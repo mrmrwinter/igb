@@ -3,7 +3,7 @@
 # ------------------------------------------
 
 # have fasta with 1000s of cds's in
-SAMPLE = "mhap.6-3"
+SAMPLE, = glob_wildcards("data/input/{sample}.cds_nt.fa")
 
 rule all:
     input:
@@ -79,7 +79,7 @@ rule take_percent_ident:
     output:
         "data/outputs/{sample}_percentIdents"
     shell:
-        "awk '{{print $3}}' {input} > {output}"
+        "awk '{{print $3}}' {input} | grep -v '100.000' > {output}"
 
 
 # #plot
