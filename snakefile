@@ -2,6 +2,11 @@
 # MIKES INTRAGENOMIC CDS BLASTING SNAKE
 # ------------------------------------------
 
+import os
+
+# input data
+## samples = {f[:-8] for f in os.listdir("data/input") if f.endswith(".cds_nt.fa")}
+
 # have fasta with 1000s of cds's in
 SAMPLE, = glob_wildcards("data/input/{sample}.cds_nt.fa")
 
