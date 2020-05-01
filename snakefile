@@ -2,15 +2,20 @@
 # MIKES INTRAGENOMIC CDS BLASTING SNAKE
 # ------------------------------------------
 
-import os
+
+import os   #imports os
 
 # input data
 ## samples = {f[:-8] for f in os.listdir("data/input") if f.endswith(".cds_nt.fa")}
+# this is a potential way to do iteration
+
 
 # have fasta with 1000s of cds's in
 SAMPLE, = glob_wildcards("data/input/{sample}.cds_nt.fa")
+# globs the sample names of all files
 
-rule all:
+
+rule all_outputs:
     input:
         expand("data/database/{sample}_cds.nhr", sample=SAMPLE),
         expand("outputs/{sample}_blastResults", sample=SAMPLE),
@@ -20,23 +25,27 @@ rule all:
         expand("outputs/{sample}.pdf", sample=SAMPLE)
 
 # make database of cds fasta
-rule make_blast_database:
+rule make_blast_database:    # name of thje rule
     input:
-        "data/input/{sample}.cds_nt.fa"
+        "data/input/{sample}.cds_nt.fa" # input to the rule
     output:
-        nhr = "data/database/{sample}_cds.nhr",
+        nhr = "data/database/{sample}_cds.nhr",   # all outputs expected from the rule
         nin = "data/database/{sample}_cds.nin",
         nsq = "data/database/{sample}_cds.nsq"
     params:
-        "data/database/{sample}_cds"
+        "data/database/{sample}_cds"  # prefix for the outputs, required by the command
     priority:
-        50
+        50   # priority of rule. makes rule be ran first regardless of I/O
     threads:
-        8
+        8  # number of threads to use
     shell:
-        "makeblastdb -in {input} -out {params} -dbtype nucl"
+        "makeblastdb \ #the shell command
+        -in {input} \ # the input
+        -out {params} \ # the output
+        -dbtype nucl"  # the database type
 
-# Blast the cds msa against blast_database
+
+# Blast the cds multiFASTA against blast_database
 rule blastn:
     input:
         db = "data/database/{sample}_cds.nhr",
@@ -64,12 +73,20 @@ rule blastn:
 # -----------------------------------------------
 
 #
+rule remove_hundreds:
+    input:
+        "outputs/{sample}_blastResults"
+    output:
+        "outputs/{sample}_blastResultsNohundred"
+    shell:
+        "grep -v '100.00' {input} > {output}"   # find a way to do this in python
+                                                # the blast results should be moved to a pandas frame before this step
 #
 # # take second top hit
 rule take_second_hit:
 # needs to parse blast output and take the second top hit row and write it to a table
     input:
-        "outputs/{sample}_blastResults"
+        "outputs/{sample}_blastResultsNoHundred"
     output:
         "outputs/{sample}_secondHits"
     shell:
