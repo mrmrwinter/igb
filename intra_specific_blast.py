@@ -50,7 +50,7 @@ class IntraSpecificBlastCommandLine:
         from Bio.Blast import NCBIXML
         import io
 
-        string_results = io.BytesIO(self.results)
+        string_results = io.StringIO(self.results)
         results = NCBIXML.parse(string_results)
         
         percents = []

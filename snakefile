@@ -22,7 +22,8 @@ rule all_outputs:
         expand("outputs/{sample}_secondHits", sample=SAMPLE),
         expand("outputs/{sample}_percentIdents", sample=SAMPLE),
         expand("outputs/{sample}_percentIdents", sample=SAMPLE),
-        expand("outputs/{sample}.pdf", sample=SAMPLE)
+        expand("outputs/{sample}/{sample}.pdf", sample=SAMPLE),
+        expand("outputs/{sample}_jupInNo100", sample=SAMPLE)
 
 # make database of cds fasta
 rule make_blast_database:    # name of thje rule
@@ -39,10 +40,7 @@ rule make_blast_database:    # name of thje rule
     threads:
         8  # number of threads to use
     shell:
-        "makeblastdb \ #the shell command
-        -in {input} \ # the input
-        -out {params} \ # the output
-        -dbtype nucl"  # the database type
+        "makeblastdb -in {input} -out {params} -dbtype nucl"  # the database type
 
 
 # Blast the cds multiFASTA against blast_database
@@ -77,7 +75,7 @@ rule remove_hundreds:
     input:
         "outputs/{sample}_blastResults"
     output:
-        "outputs/{sample}_blastResultsNohundred"
+        "outputs/{sample}_blastResultsNoHundred"
     shell:
         "grep -v '100.00' {input} > {output}"   # find a way to do this in python
                                                 # the blast results should be moved to a pandas frame before this step
@@ -92,6 +90,27 @@ rule take_second_hit:
     shell:
       "awk 'NR % 2 == 0' {input} > {output}"
 #
+
+
+
+
+rule make_input_for_igbpynb:
+# needs to parse blast output and take the second top hit row and write it to a table
+    input:
+        "outputs/{sample}_secondHits"
+    output:
+        "outputs/{sample}_cdssForJupyter"
+    shell:
+      "grep -v '100.00' {input} | cut -f1 > {output}"
+#
+rule make_input_for_igbpynb_2:
+    input:
+        headers = "outputs/{sample}_cdssForJupyter",
+        cdss = "data/input/{sample}.cds_nt.fa"
+    output:
+        "outputs/{sample}_jupInNo100"
+    shell:
+        "seqtk subseq {input.cdss} {input.headers} > {output}"
 #
 # # take percent ident of all seconds hits
 rule take_percent_ident:
@@ -109,6 +128,6 @@ rule plot:
     input:
         "outputs/{sample}_percentIdents"
     output:
-        "outputs/{sample}.pdf"
+        "outputs/{sample}/{sample}.pdf"
     script:
         "scripts/pdplot.py"
