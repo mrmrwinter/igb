@@ -18,12 +18,12 @@ SAMPLE, = glob_wildcards("data/input/{sample}.cds_nt.fa")
 rule all_outputs:
     input:
         expand("data/database/{sample}_cds.nhr", sample=SAMPLE),
-        expand("outputs/{sample}_blastResults", sample=SAMPLE),
-        expand("outputs/{sample}_secondHits", sample=SAMPLE),
-        expand("outputs/{sample}_percentIdents", sample=SAMPLE),
-        expand("outputs/{sample}_percentIdents", sample=SAMPLE),
-        expand("outputs/{sample}/{sample}.pdf", sample=SAMPLE),
-        expand("outputs/{sample}_jupInNo100", sample=SAMPLE)
+        expand("outputs/{sample}/blastResults", sample=SAMPLE),
+        expand("outputs/{sample}/secondHits", sample=SAMPLE),
+        expand("outputs/{sample}/percentIdents", sample=SAMPLE),
+        expand("outputs/{sample}/percentIdents", sample=SAMPLE),
+        expand("results/{sample}/{sample}.pdf", sample=SAMPLE),
+        expand("outputs/{sample}/jupInNo100", sample=SAMPLE)
 
 # make database of cds fasta
 rule make_blast_database:    # name of thje rule
@@ -49,7 +49,7 @@ rule blastn:
         db = "data/database/{sample}_cds.nhr",
         query = "data/input/{sample}.cds_nt.fa"
     output:
-        "outputs/{sample}_blastResults"
+        "outputs/{sample}/blastResults"
     params:
         "data/database/{sample}_cds"
     threads:
@@ -71,54 +71,53 @@ rule blastn:
 # -----------------------------------------------
 
 #
-rule remove_hundreds:
-    input:
-        "outputs/{sample}_blastResults"
-    output:
-        "outputs/{sample}_blastResultsNoHundred"
-    shell:
-        "grep -v '100.00' {input} > {output}"   # find a way to do this in python
-                                                # the blast results should be moved to a pandas frame before this step
+
 #
 # # take second top hit
 rule take_second_hit:
 # needs to parse blast output and take the second top hit row and write it to a table
     input:
-        "outputs/{sample}_blastResultsNoHundred"
+        "outputs/{sample}/blastResults"
     output:
-        "outputs/{sample}_secondHits"
+        "outputs/{sample}/secondHits"
     shell:
-      "awk 'NR % 2 == 0' {input} > {output}"
+      "awk 'NR % 1 == 0' {input} > {output}"
 #
 
-
+rule remove_hundreds:
+    input:
+        "outputs/{sample}/secondHits"
+    output:
+        "outputs/{sample}/secondHitsNoHundred"
+    shell:
+        "grep -v '100.00' {input} > {output}"   # find a way to do this in python
+                                                # the blast results should be moved to a pandas frame before this step
 
 
 rule make_input_for_igbpynb:
 # needs to parse blast output and take the second top hit row and write it to a table
     input:
-        "outputs/{sample}_secondHits"
+        "outputs/{sample}/secondHits"
     output:
-        "outputs/{sample}_cdssForJupyter"
+        "outputs/{sample}/cdssForJupyter"
     shell:
       "grep -v '100.00' {input} | cut -f1 > {output}"
 #
 rule make_input_for_igbpynb_2:
     input:
-        headers = "outputs/{sample}_cdssForJupyter",
+        headers = "outputs/{sample}/cdssForJupyter",
         cdss = "data/input/{sample}.cds_nt.fa"
     output:
-        "outputs/{sample}_jupInNo100"
+        "outputs/{sample}/jupInNo100"
     shell:
         "seqtk subseq {input.cdss} {input.headers} > {output}"
 #
 # # take percent ident of all seconds hits
 rule take_percent_ident:
 # this will take the column with all of the percent identities and either add them to a df or a table
-    input:
-        "outputs/{sample}_secondHits"
+    input:"outputs/{sample}/secondHits"
     output:
-        "outputs/{sample}_percentIdents"
+        "outputs/{sample}/percentIdents"
     shell:
         "awk '{{print $3}}' {input} | grep -v '100.000' > {output}"
 
@@ -126,8 +125,8 @@ rule take_percent_ident:
 # #plot
 rule plot:
     input:
-        "outputs/{sample}_percentIdents"
+        "outputs/{sample}/percentIdents"
     output:
-        "outputs/{sample}/{sample}.pdf"
+        "results/{sample}/{sample}.pdf"
     script:
         "scripts/pdplot.py"
