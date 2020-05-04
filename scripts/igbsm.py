@@ -1,4 +1,4 @@
-import intra_specific_blast2 as isb
+import intra_specific_blast as isb
 import Bio
 import io
 
@@ -10,7 +10,6 @@ cds_prexix_isb = isb.IntraSpecificBlastCommandLine(cdss)
 cds_prexix_isb.execute()
 cds_prexix_percents = cds_prexix_isb.calculate_percents()
 
-from reprophylo import *
 import matplotlib.pyplot
 plt.switch_backend('agg')
 cds_prexix_hist = plt.hist(cds_prexix_percents, bins=200)

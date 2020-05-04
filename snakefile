@@ -25,7 +25,7 @@ rule all_outputs:
         expand("results/{sample}/{sample}.pdf", sample=SAMPLE),
         expand("outputs/{sample}/jupInNo100", sample=SAMPLE),
         #expand("results/{sample}/pyplot.png", sample=SAMPLE),
-    #    expand("outputs/{sample}/igbpyOut.pdf", sample=SAMPLE)
+        expand("outputs/{sample}/igbpyOut.pdf", sample=SAMPLE)
 
 # make database of cds fasta
 rule make_blast_database:    # name of thje rule
@@ -151,32 +151,12 @@ rule plot:
 #         plt.savefig('{output}', dpi=900, frameon=False)
 #         """
 
-# rule igb:
-#     conda:
-#         "envs/igbpy2.yaml"
-#     input:
-#         "data/input/{sample}.cds_nt.fa"
-#     output:
-#         "outputs/{sample}/igbpyOut.pdf"
-#     params:
-#         "{sample}"
-#     run:
-#         """
-#         import intra_specific_blast2 as isb
-#         import Bio
-#         import io
-#
-#
-#         cdss = {input}
-#         {params}_isb = isb.IntraSpecificBlastCommandLine(cdss)
-#         {params}_isb.execute()
-#         {params}_percents = {params}_isb.calculate_percents()
-#
-#         from reprophylo import *
-#         %matplotlib inline
-#
-#         {params}_hist = plt.hist({params}_percents, bins=200)
-#         plt.plot({params}_hist[1][1:-1],{params}_hist[0][:-1], color='red', linewidth=2)
-#         plt.savefig('{output}', dpi=900, frameon=False)
-#
-#         """
+rule igb:
+    input:
+        "data/input/{sample}.cds_nt.fa"
+    output:
+        "outputs/{sample}/igbpyOut.png"
+    params:
+        "{sample}"
+    script:
+      "igbsm.py"
