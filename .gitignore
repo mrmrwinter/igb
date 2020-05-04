@@ -1,3 +1,5 @@
 .snakemake
-data/d*
+data/*
 results/*
+data/input/*
+.ip*

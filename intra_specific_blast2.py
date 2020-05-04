@@ -9,54 +9,66 @@ def file_translate(input_fasta):
     return input_fasta+'.aa'
 
 class IntraSpecificBlastCommandLine:
-    
+
     def __init__(self, cdss, makeblastdb='makeblastdb', cd_hit_est='cd-hit-est', **kwargs):
-        
+
+# #####
+#
+#         dirName = 'data/98s'
+# try:
+#     # Create target Directory
+#     os.mkdir(dirName)
+#     print("Directory ", dirName,  " created.")
+# except FileExistsError:
+#     print("Directory ", dirName,  " already exists.")
+#
+# ####
+
         cd_hit_cline = cd_hit_est+'  -i '+cdss+' -o '+cdss+'.98 -c 0.98 -g 1'
-        
+
         self.cd_hit_est_cline = cd_hit_cline
-        
+
         db_cline = makeblastdb+' -in '+cdss+'.98 -dbtype nucl'
         self.makeblastdb_cline = db_cline
 
         from Bio.Blast.Applications import NcbiblastnCommandline
-        
+
         kwargs['query'] = cdss+'.98'
         kwargs['db'] = cdss+'.98'
         kwargs['outfmt'] = 5
-        
+
         cline = NcbiblastnCommandline(**kwargs)
-        
+
         self.blastn_cline = cline
-        
-        
+
+
         self.results_handle = None
-        
+
     def execute(self):
-        
+
         import subprocess as sub
-        
+
         sub.call(self.cd_hit_est_cline, shell=True)
-        
+
         import time
         time.sleep(30)
-        
+
         sub.call(self.makeblastdb_cline, shell=True)
         time.sleep(30)
-        
+
         self.results = self.blastn_cline()[0]
-        
+
     def calculate_percents(self):
-        
+
         from Bio.Blast import NCBIXML
         import StringIO
 
         results = NCBIXML.parse(StringIO.StringIO(self.results))
-        
+
         percents = []
-        
+
         self.percent_per_hit = {}
-        
+
         for query in results:
             query_id = query.query.split()[0]
             query_length = query.query_length
@@ -73,9 +85,9 @@ class IntraSpecificBlastCommandLine:
                         self.percent_per_hit[query_id] = {'hit': match_id,
                                                           'percent_ident': percent,
                                                           'prop_query': prop_target_of_query}
-        self.percent_per_hit            
+        self.percent_per_hit
         return percents
-    
+
     def write_blast_results(self, lower_cutoff = 0, upper_cutoff = 100):
         report = ''
         report += ('matches on other contigs than query with %s <= identity <= %s\n'%(str(lower_cutoff), str(upper_cutoff))).upper()
