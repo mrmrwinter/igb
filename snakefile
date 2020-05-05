@@ -23,9 +23,10 @@ rule all_outputs:
         expand("outputs/{sample}/percentIdents", sample=SAMPLE),
         expand("outputs/{sample}/percentIdents", sample=SAMPLE),
         expand("results/{sample}/{sample}.pdf", sample=SAMPLE),
-        expand("outputs/{sample}/jupInNo100", sample=SAMPLE),
+        expand("outputs/{sample}/jupInNo100.cds_nt.fa", sample=SAMPLE),
         #expand("results/{sample}/pyplot.png", sample=SAMPLE),
-        expand("results/{sample}/igbpyOut.png", sample=SAMPLE)
+        expand("results/{sample}/igbpyOut.png", sample=SAMPLE),
+        expand("results/{sample}/igbpyOutNo100.png", sample=SAMPLE)
 
 # make database of cds fasta
 rule make_blast_database:    # name of thje rule
@@ -96,7 +97,7 @@ rule remove_hundreds:
                                                 # the blast results should be moved to a pandas frame before this step
 
 
-rule make_input_for_igbpynb:
+rule make_input_for_igbpy:
 # needs to parse blast output and take the second top hit row and write it to a table
     input:
         "outputs/{sample}/secondHits"
@@ -105,12 +106,12 @@ rule make_input_for_igbpynb:
     shell:
       "grep -v '100.00' {input} | cut -f1 > {output}"
 #
-rule make_input_for_igbpynb_2:
+rule make_input_for_igbpy_2:
     input:
         headers = "outputs/{sample}/cdssForJupyter",
         cdss = "data/input/{sample}.cds_nt.fa"
     output:
-        "outputs/{sample}/jupInNo100"
+        "outputs/{sample}/jupInNo100.cds_nt.fa"
     shell:
         "seqtk subseq {input.cdss} {input.headers} > {output}"
 #
@@ -156,6 +157,16 @@ rule igb:
         "data/input/{sample}.cds_nt.fa"
     output:
         "results/{sample}/igbpyOut.png"
+    params:
+        "{sample}"
+    script:
+      "igbsm.py"
+
+rule igb_No100:
+    input:
+        "outputs/{sample}/jupInNo100.cds_nt.fa"
+    output:
+        "results/{sample}/igbpyOutNo100.png"
     params:
         "{sample}"
     script:
