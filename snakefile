@@ -104,7 +104,7 @@ rule make_input_for_igbpy:
     output:
         "outputs/{sample}/cdssForJupyter"
     shell:
-      "grep -v '100.00' {input} | cut -f1 > {output}"
+      "grep -v '100.00' {input} | cut -f2 > {output}"
 #
 rule make_input_for_igbpy_2:
     input:
@@ -160,7 +160,7 @@ rule igb:
     params:
         "{sample}"
     script:
-      "igbsm.py"
+        "igbsm.py"
 
 rule igb_No100:
     input:
@@ -170,4 +170,4 @@ rule igb_No100:
     params:
         "{sample}"
     script:
-      "igbsm.py"
+        "igbsm.py"
