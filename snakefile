@@ -25,7 +25,7 @@ rule all_outputs:
         expand("results/{sample}/{sample}.pdf", sample=SAMPLE),
         expand("outputs/{sample}/jupInNo100", sample=SAMPLE),
         #expand("results/{sample}/pyplot.png", sample=SAMPLE),
-        expand("outputs/{sample}/igbpyOut.pdf", sample=SAMPLE)
+        expand("results/{sample}/igbpyOut.png", sample=SAMPLE)
 
 # make database of cds fasta
 rule make_blast_database:    # name of thje rule
@@ -155,7 +155,7 @@ rule igb:
     input:
         "data/input/{sample}.cds_nt.fa"
     output:
-        "outputs/{sample}/igbpyOut.png"
+        "results/{sample}/igbpyOut.png"
     params:
         "{sample}"
     script:
