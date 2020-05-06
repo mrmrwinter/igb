@@ -153,23 +153,6 @@ rule plot:
         "scripts/pdplot.py"
 
 
-# #### python method
-#
-# rule plotting:
-#     input:
-#         "outputs/{sample}/percentIdents",
-#     output:
-#         "results/{sample}/pyplot.png"
-#     params:
-#         "{sample}"
-#     run:
-#         """
-#         import matplotlib
-#         {params}_hist = plt.hist({input}, bins=200)
-#         plt.plot({params}_hist[1][1:-1],{params}_hist[0][:-1], color='red', linewidth=2)
-#         plt.savefig('{output}', dpi=900, frameon=False)
-#         """
-
 rule igb:
     input:
         "data/input/{sample}.cds_nt.fa"
@@ -189,3 +172,15 @@ rule igb_No100:
         "{sample}"
     script:
         "igbsm.py"
+
+
+### code below for overlayed line hist
+
+# plt.plot(MfloJB5_hist[1][1:-1],MfloJB5_hist[0][:-1], color='red', linewidth=2)
+# plt.plot(mhap_63.nh_hist[1][1:-1],mhap_63.nh_hist[0][:-1], color='grey', linewidth=2)
+# plt.plot(MincW1_hist[1][1:-1],MincW1_hist[0][:-1], color='green', linewidth=2)
+# plt.plot(MjavVW4_hist[1][1:-1],MjavVW4_hist[0][:-1], color='green', linewidth=2)
+# plt.savefig('hap_inc_flo_blast.png', dpi=900, frameon=False)
+
+
+# for worm in {input}:

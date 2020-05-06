@@ -17,6 +17,22 @@
 
 Cleaned up directories.
 
+Started adding the rest of Amirs IGB notebook to the snakemake workflow.
+Amirs notebook can be found here: https://tinyurl.com/y8k62mw6
+
+Added a cell to igb.ipynb with the code:
+
+`plt.plot(minc_hist[1][1:-1],minc_hist[0][:-1], color='red', linewidth=2)
+plt.plot(hapnh_hist[1][1:-1],hapnh_hist[0][:-1], color='grey', linewidth=2)
+plt.plot(mflo_hist[1][1:-1],mflo_hist[0][:-1], color='green', linewidth=2)
+plt.savefig('hap_inc_flo_blast.png', dpi=900, frameon=False)`
+
+this plots the second hit percent idents of incognita, floridensis, and haplanaria.
+Will need the cdss of the uncollapsed haplanaria assembly as well as cdss from hapla for comparison.
+Javanica (MjavVW4) not working in this script for some reason. Returns error: `File is not accessible:  "data/input/MjavVW4.cds_nt.fa.98\"`
+This was due to the path being defined incorrectly in an earlier cell.
+
+
 #-------------------------------
 
 This is the point where this lab notebook was started.
