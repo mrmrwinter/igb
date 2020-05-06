@@ -23,6 +23,7 @@ rule all_outputs:
         expand("outputs/{sample}/percentIdents", sample=SAMPLE),
         expand("outputs/{sample}/percentIdents", sample=SAMPLE),
         expand("results/{sample}/{sample}.pdf", sample=SAMPLE),
+        expand("results/{sample}/{sample}No100.pdf", sample=SAMPLE),
         expand("outputs/{sample}/jupInNo100.cds_nt.fa", sample=SAMPLE),
         #expand("results/{sample}/pyplot.png", sample=SAMPLE),
         expand("results/{sample}/igbpyOut.png", sample=SAMPLE),
@@ -91,7 +92,7 @@ rule remove_hundreds:
     input:
         "outputs/{sample}/secondHits"
     output:
-        "outputs/{sample}/secondHitsNoHundred"
+        "outputs/{sample}/secondHitsNo100"
     shell:
         "grep -v '100.00' {input} > {output}"   # find a way to do this in python
                                                 # the blast results should be moved to a pandas frame before this step
@@ -104,7 +105,7 @@ rule make_input_for_igbpy:
     output:
         "outputs/{sample}/cdssForJupyter"
     shell:
-      "grep -v '100.00' {input} | cut -f2 > {output}"
+      "grep -v '100.00' {input} | cut -f1 > {output}"
 #
 rule make_input_for_igbpy_2:
     input:
@@ -124,6 +125,23 @@ rule take_percent_ident:
     shell:
         "awk '{{print $3}}' {input} | grep -v '100.000' > {output}"
 
+rule take_percent_ident_no100:
+# this will take the column with all of the percent identities and either add them to a df or a table
+    input:"outputs/{sample}/secondHitsNo100"
+    output:
+        "outputs/{sample}/percentIdentsNo100"
+    shell:
+        "awk '{{print $3}}' {input} | grep -v '100.000' > {output}"
+
+
+# #plot
+rule plot_no100:
+    input:
+        "outputs/{sample}/percentIdentsNo100"
+    output:
+        "results/{sample}/{sample}No100.pdf"
+    script:
+        "scripts/pdplot.py"
 
 # #plot
 rule plot:
