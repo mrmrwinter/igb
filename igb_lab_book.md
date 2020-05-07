@@ -13,6 +13,22 @@
 
 ### The lab book will be in reverse chronological order from here
 
+## 7/5/20
+
+###Things from before
+Get the latest python plotting scripts working in the snakemake workflow.
+Get it ran with uncollapsed assembly.
+Sort out the removal of the 100s
+
+### things done
+
+Sorted removal of 100% hits in M. haplanaria by inputting the `outputs/mhap_63_nh/percentIdents` to amirs notebook after the blast stage
+Changed paths in Amirs notebook to fit the data structure
+Can now replicate Amirs igb plot exactly using scripts in the `intraspecific_blast.ipynb`
+
+
+
+
 ## 6/5/20
 
 Cleaned up directories.
