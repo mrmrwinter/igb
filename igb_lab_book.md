@@ -94,9 +94,14 @@ plt.legend(handles=[Minc_line,Mflo_line,Mhaplanaria_line],
 
 Javanica wont work in this cell/script. Gives error: `TypeError: len() of unsized object`
 
+Also hap has a large spike on 100. this could be due to the assembly being collapsed.
+Attempts to remove cdss that have a second hit of 100 have failed so far: see 'rule make_input_for_igbpy' in the snakefile
+
 
 ### To do next
 Get the latest python plotting scripts working in the snakemake workflow.
+Get it ran with uncollapsed assembly.
+Sort out the removal of the 100s
 
 
 #-------------------------------

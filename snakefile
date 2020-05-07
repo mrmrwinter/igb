@@ -83,9 +83,9 @@ rule take_second_hit:
     input:
         "outputs/{sample}/blastResults"
     output:
-        "outputs/{sample}/secondHits"
+        "outputs/{sample}/secondHits"  ######## fault
     shell:
-      "awk 'NR % 1 == 0' {input} > {output}"
+      "awk 'NR%2==0' {input} > {output}"
 #
 
 rule remove_hundreds:
@@ -105,7 +105,7 @@ rule make_input_for_igbpy:
     output:
         "outputs/{sample}/cdssForJupyter"
     shell:
-      "grep -v '100.00' {input} | cut -f1 > {output}"
+      "grep -v '100.00' {input} | cut -f2 > {output}"
 #
 rule make_input_for_igbpy_2:
     input:
