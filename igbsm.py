@@ -15,5 +15,5 @@ import matplotlib.pyplot
 from matplotlib import pyplot as plt
 #plt.switch_backend('agg')
 cds_prefix_hist = plt.hist(cds_prefix_percents, bins=200)
-plt.plot(cds_prefix_hist[1][1:-1],cds_prefix_hist[0][:-1], color='red', linewidth=2)
+plt.plot(cds_prefix_hist[1][1:-1],cds_prefix_hist[0][:-1], color='red', linewidth=1)
 plt.savefig(snakemake.output[0], dpi=900, frameon=False)

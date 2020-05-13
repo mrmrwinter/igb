@@ -27,6 +27,8 @@ rule all_outputs:  # target rule
         expand("results/{sample}/igbpyOut.png", sample=SAMPLE),  # notebook output
         expand("results/{sample}/igbpyOutNo100.png", sample=SAMPLE)  # notebook output from feeding percents in halfway through
 
+# -----------------------------------------
+# DATABASE CREATION
 
 rule make_blast_database:  # Rule to make database of cds fasta
     input:
@@ -47,6 +49,9 @@ rule make_blast_database:  # Rule to make database of cds fasta
         -out {params} \
         -dbtype nucl"  # the database type
 
+
+# -------------------------------------------------------------
+# BLASTING
 
 rule blastn:  # Blast the cds multiFASTA against blast_database
     input:
@@ -73,6 +78,9 @@ rule blastn:  # Blast the cds multiFASTA against blast_database
         #      the output destination
 
 
+# ---------------------------------------------------------
+# DATA TRANSFORMATION
+
 rule take_second_hit:  # parses blast output, takes the second top hit row and writes it to a table
     input:
         "outputs/{sample}/blastResults"  # input is the blast results
@@ -82,90 +90,74 @@ rule take_second_hit:  # parses blast output, takes the second top hit row and w
       "awk 'NR%2==0' {input} > {output}"  # takies second row from a table and writes to a new table
 
 
-rule remove_hundreds:  # 
+rule remove_hundreds:  # removes any results in secondHits that hit at 100%
     input:
         "outputs/{sample}/secondHits"
     output:
         "outputs/{sample}/secondHitsNo100"
     shell:
-        "grep -v '100.00' {input} > {output}"   # find a way to do this in python
+        "grep -v '100.00' {input} > {output}"   # do this in python
                                                 # the blast results should be moved to a pandas frame before this step
 
 
-rule make_input_for_igbpy:
-# needs to parse blast output and take the second top hit row and write it to a table
+rule take_percent_ident:  # take percent ident of all seconds hits and either add them to a new table
     input:
-        "outputs/{sample}/secondHits"
+        "outputs/{sample}/secondHits"  # secondHit table
     output:
-        "outputs/{sample}/cdssForJupyter"
+        "outputs/{sample}/percentIdents"  # table of only percent identities
     shell:
-      "grep -v '100.00' {input} | cut -f2 > {output}"
-#
-rule make_input_for_igbpy_2:
-    input:
-        headers = "outputs/{sample}/cdssForJupyter",
-        cdss = "data/input/{sample}.cds_nt.fa"
-    output:
-        "outputs/{sample}/jupInNo100.cds_nt.fa"
-    shell:
-        "seqtk subseq {input.cdss} {input.headers} > {output}"
-#
-# # take percent ident of all seconds hits
-rule take_percent_ident:
-# this will take the column with all of the percent identities and either add them to a df or a table
-    input:"outputs/{sample}/secondHits"
-    output:
-        "outputs/{sample}/percentIdents"
-    shell:
-        "awk '{{print $3}}' {input} | grep -v '100.000' > {output}"
+        "awk '{{print $3}}' {input} > {output}"  # takes the percent identity column and writes to new table
 
-rule take_percent_ident_no100:
-# this will take the column with all of the percent identities and either add them to a df or a table
-    input:"outputs/{sample}/secondHitsNo100"
+
+rule take_percent_ident_no100:  # this does the same as the rule above but does not copy over hits of 100%
+    input:
+        "outputs/{sample}/secondHitsNo100"
     output:
         "outputs/{sample}/percentIdentsNo100"
     shell:
-        "awk '{{print $3}}' {input} | grep -v '100.000' > {output}"
+        "awk '{{print $3}}' {input} > {output}"  # takes percent ident column and writes to new table
 
 
-# #plot
-rule plot_no100:
+# -------------------------------------------------------------------
+# PLOTTING
+
+rule plot_no100:  # plots the percent identities with 100%s removed as a histogram
     input:
-        "outputs/{sample}/percentIdentsNo100"
+        "outputs/{sample}/percentIdentsNo100"  # percent ident table with 100% hits removed
     output:
-        "results/{sample}/{sample}No100.pdf"
+        "results/{sample}/{sample}No100.pdf"  # outputs a histogram in pdf
     script:
-        "scripts/pdplot.py"
+        "scripts/pdplot.py"  # runs from a python script
 
-# #plot
-rule plot:
+
+rule plot:  # plots the percent identities as a histogram
     input:
-        "outputs/{sample}/percentIdents"
+        "outputs/{sample}/percentIdents"  # percentIdent table
     output:
-        "results/{sample}/{sample}.pdf"
+        "results/{sample}/{sample}.pdf"  # outputs a histogram in pdf format
     script:
-        "scripts/pdplot.py"
+        "scripts/pdplot.py"  # runs a python script that inputs to pandas and creates a plot
 
 
-rule igb:
+rule igb:  # runs a script written from Amirs notebooks
     input:
-        "data/input/{sample}.cds_nt.fa"
+        "data/input/{sample}.cds_nt.fa"  # input is the "raw" cds data
     output:
-        "results/{sample}/igbpyOut.png"
+        "results/{sample}/igbpyOut.png"  # outputs a smoothed histogram in png
     params:
-        "{sample}"
+        "{sample}"  # prefix for the script
     script:
-        "igbsm.py"
+        "igbsm.py"  # runs from a python script
 
-rule igb_No100:
+rule igbNo100:  # runs a script written from Amirs notebooks
     input:
-        "outputs/{sample}/jupInNo100.cds_nt.fa"
+        "data/input/{sample}.cds_nt.fa"  # input is the "raw" cds data
     output:
-        "results/{sample}/igbpyOutNo100.png"
+        "results/{sample}/igbpyOut.png"  # outputs a smoothed histogram in png
     params:
-        "{sample}"
+        "{sample}/"  # prefix for the script
     script:
-        "igbsm.py"
+        "igbsm.py"  # runs from a python script
 
 
 ### code below for overlayed line hist
@@ -193,3 +185,32 @@ rule igb_No100:
 # -----------------------------------------------
 
 #
+
+## this was old code for making an inpit for the notebook
+## fairly sure this is redundant now
+# rule make_input_for_igbpy:
+# # needs to parse blast output and take the second top hit row and write it to a table
+#     input:
+#         "outputs/{sample}/secondHits"
+#     output:
+#         "outputs/{sample}/cdssForJupyter"
+#     shell:
+#       "grep -v '100.00' {input} | cut -f2 > {output}"
+# #
+# rule make_input_for_igbpy_2:
+#     input:
+#         headers = "outputs/{sample}/cdssForJupyter",
+#         cdss = "data/input/{sample}.cds_nt.fa"
+#     output:
+#         "outputs/{sample}/jupInNo100.cds_nt.fa"
+#     shell:
+#         "seqtk subseq {input.cdss} {input.headers} > {output}"
+# rule igb_No100:  # runs the plotting section of Amirs notebooks, inputting percentIdents with 100%s removed
+#     input:
+#         "outputs/{sample}/jupInNo100.cds_nt.fa"
+#     output:
+#         "results/{sample}/igbpyOutNo100.png"
+#     params:
+#         "{sample}"
+#     script:
+#         "igbsm.py"
