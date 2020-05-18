@@ -2,11 +2,11 @@
 # MIKES INTRAGENOMIC CDS BLASTING SNAKE
 # ------------------------------------------
 
-## Place input files in data/input/
-## Ensure they end in .cds_nt.fa
-## Ensure headers of fastas contain no spaces
+# Place input files in data/input/
+# Ensure they end in .cds_nt.fa
+# Ensure headers of fastas contain no spaces
 
-import os   #imports os
+import os  # imports os
 
 # input data
 ## samples = {f[:-8] for f in os.listdir("data/input") if f.endswith(".cds_nt.fa")}  # this is a potential way to do iteration
